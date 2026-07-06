@@ -1,0 +1,4 @@
+# Shell-Skripte und Konfigurationsdateien immer mit LF (Unix) speichern
+*.sh text eol=lf
+*.conf text eol=lf
+deploy.conf text eol=lf
