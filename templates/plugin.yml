@@ -1,0 +1,14 @@
+# plugin.yml – Metadaten für dieses Moodle-Plugin
+# Diese Datei dient der Dokumentation und späterem Abhängigkeitsmanagement.
+# Sie wird beim Deployment NICHT nach Moodle kopiert.
+
+component: block_beispiel     # Moodle-Komponentenname (= GitHub-Repo-Name)
+type: block                   # block | mod | local | theme | auth | ...
+name: Beispiel-Plugin
+description: Kurze Beschreibung was dieses Plugin tut.
+
+# Andere Toolio-Plugins, die VOR diesem deployt sein müssen (optional):
+requires: []
+# Beispiel:
+# requires:
+#   - local_toolio

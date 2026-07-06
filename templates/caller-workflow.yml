@@ -1,0 +1,15 @@
+name: Deploy to Moodle
+
+# ============================================================
+# Diese Datei in JEDEM Plugin-Repo unter .github/workflows/deploy.yml ablegen.
+# Nichts anpassen – der Repo-Name wird automatisch erkannt.
+# ============================================================
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    uses: Toolio-Moodle-Plugin/toolio-infra/.github/workflows/deploy.yml@main
+    secrets: inherit

@@ -1,0 +1,43 @@
+name: Moodle Plugin Deploy
+
+# ============================================================
+# Zentraler Deploy-Workflow – wird von jedem Plugin-Repo aufgerufen.
+# Dieses File liegt in toolio-infra und wird NIE plugin-spezifisch geändert.
+# ============================================================
+
+on:
+  workflow_call:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Plugin-Code auschecken
+        uses: actions/checkout@v4
+
+      - name: SSH-Schlüssel einrichten
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Plugin-Dateien auf VPS hochladen (Staging)
+        run: |
+          PLUGIN_COMPONENT="${GITHUB_REPOSITORY##*/}"
+          echo "Deploye Plugin: $PLUGIN_COMPONENT"
+          rsync -av --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='plugin.yml' \
+            --exclude='*.md' \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            ./ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/toolio/staging/${PLUGIN_COMPONENT}/"
+
+      - name: Deploy-Skript auf VPS ausführen
+        run: |
+          PLUGIN_COMPONENT="${GITHUB_REPOSITORY##*/}"
+          ssh -i ~/.ssh/deploy_key \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "/opt/toolio/deploy/deploy.sh ${PLUGIN_COMPONENT}"
