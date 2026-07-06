@@ -19,6 +19,7 @@ case "$PREFIX" in
   mod)              SUBDIR="mod/$NAME"                           ;;
   local)            SUBDIR="local/$NAME"                        ;;
   theme)            SUBDIR="theme/$NAME"                         ;;
+  format)           SUBDIR="course/format/$NAME"                 ;;
   auth)             SUBDIR="auth/$NAME"                          ;;
   report)           SUBDIR="report/$NAME"                        ;;
   availability)     SUBDIR="availability/condition/$NAME"        ;;
