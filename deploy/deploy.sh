@@ -57,32 +57,31 @@ if [ ! -d "$STAGING" ]; then
   exit 1
 fi
 
-# --- Version VOR dem Deploy lesen ---
-DEST_VERSION_FILE="$DEST/version.php"
-if [ -f "$DEST_VERSION_FILE" ]; then
-  OLD_VERSION=$(grep -oP '\$plugin->version\s*=\s*\K\d+' "$DEST_VERSION_FILE" 2>/dev/null || echo "0")
-else
-  OLD_VERSION="0"
-fi
+# Pfad des Plugins INNERHALB des Containers (dort lesbar, das Host-Volume ist root-only)
+CONTAINER_PATH="$MOODLE_ROOT/public/$SUBDIR"
 
-# --- Backup erstellen ---
+# --- Version VOR dem Deploy lesen (über den Container) ---
+OLD_VERSION=$(docker exec "$CONTAINER_NAME" sh -c "grep -oP '\\\$plugin->version\\s*=\\s*\\K[0-9]+' '$CONTAINER_PATH/version.php' 2>/dev/null" || echo "0")
+[ -z "$OLD_VERSION" ] && OLD_VERSION="0"
+
+# --- Backup erstellen (nur wenn Plugin bereits existiert) ---
 echo "📦 Erstelle Backup..."
 mkdir -p "$BACKUP_BASE"
-if [ -d "$DEST" ]; then
-  cp -a "$DEST" "$BACKUP_BASE/$TIMESTAMP"
+if docker exec "$CONTAINER_NAME" test -d "$CONTAINER_PATH"; then
+  sudo rsync -a "$DEST/" "$BACKUP_BASE/$TIMESTAMP/"
   echo "   Gespeichert: $BACKUP_BASE/$TIMESTAMP"
 else
   echo "   (Kein vorheriges Plugin – kein Backup nötig)"
 fi
 
-# --- Plugin deployen ---
+# --- Plugin deployen (rsync mit sudo, legt Zielverzeichnis selbst an) ---
 echo "📂 Synchronisiere Dateien nach $DEST ..."
-mkdir -p "$DEST"
 sudo rsync -av --delete "$STAGING/" "$DEST/"
 sudo chown -R 33:33 "$DEST"   # 33 = www-data UID
 
-# --- Version NACH dem Deploy lesen ---
-NEW_VERSION=$(grep -oP '\$plugin->version\s*=\s*\K\d+' "$DEST/version.php" 2>/dev/null || echo "0")
+# --- Version NACH dem Deploy lesen (über den Container) ---
+NEW_VERSION=$(docker exec "$CONTAINER_NAME" sh -c "grep -oP '\\\$plugin->version\\s*=\\s*\\K[0-9]+' '$CONTAINER_PATH/version.php' 2>/dev/null" || echo "0")
+[ -z "$NEW_VERSION" ] && NEW_VERSION="0"
 
 echo ""
 echo "   Alte Version: $OLD_VERSION"
