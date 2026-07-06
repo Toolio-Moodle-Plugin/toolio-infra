@@ -15,6 +15,8 @@ require_once($CFG->libdir  . '/enrollib.php');
 
 // Umlaute in Loginnamen erlauben (für "sören").
 set_config('extendedusernamechars', 1);
+// Passwort-Richtlinie deaktivieren (Demo-Passwörter wie "Tim123!" sind kurz).
+set_config('passwordpolicy', 0);
 
 // ── Nutzer anlegen ───────────────────────────────────────────────────────────
 
