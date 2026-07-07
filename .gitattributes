@@ -2,3 +2,6 @@
 *.sh text eol=lf
 *.conf text eol=lf
 deploy.conf text eol=lf
+
+# PHP-Dateien: LF-Zeilenenden, kein BOM
+*.php text eol=lf working-tree-encoding=UTF-8
